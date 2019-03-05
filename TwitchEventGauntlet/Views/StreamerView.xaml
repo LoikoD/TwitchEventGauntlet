@@ -52,6 +52,13 @@
                 <Label Content="{Binding SubGoalStr}"  FontSize="20" />
                 <Button x:Name="AddSub" Content="+"  Width="20" Height="20"/>
             </StackPanel>
+
+            <!-- Row 4 -->
+            <StackPanel Grid.Column="1" Grid.Row="4" Orientation="Horizontal" Margin="0,20">
+                <Button x:Name="Drop" Content="Drop" FontSize="20" Width="120" Height="45" MinWidth="65" MinHeight="25" Margin="5"/>
+                <Button x:Name="Reroll" Content="Reroll" FontSize="20" Width="120" Height="45" MinWidth="65" MinHeight="25" Margin="0,5"/>
+                <Button x:Name="Completed" Content="Completed"  FontSize="20" Width="120" Height="45" MinWidth="65" MinHeight="25" Margin="5"/>
+            </StackPanel>
         </Grid>
         
         <!-- Column 2 -->

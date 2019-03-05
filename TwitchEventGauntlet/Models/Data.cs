@@ -231,100 +231,347 @@ namespace TwitchEventGauntlet.Models
             return null;
         }
 
-        public void SetSubsNum(int subs, int subsNeed)
+        public async void SetSubsNum(int subs, int subsNeed)
         {
-            var lobg = new List<object>() { (subs + "/" + subsNeed).ToString() };
-            updateRequestBody = new ValueRange();
-            updateRequestBody.Values = new List<IList<object>>() { lobg };
+            await Task.Factory.StartNew(() =>
+            {
+                var lobg = new List<object>() { (subs + "/" + subsNeed).ToString() };
+                updateRequestBody = new ValueRange();
+                updateRequestBody.Values = new List<IList<object>>() { lobg };
 
-            SpreadsheetsResource.ValuesResource.UpdateRequest updateRequest = Service.Spreadsheets.Values.Update(updateRequestBody, SpreadsheetId, Name + "!S7");
-            updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.RAW;
-            // To execute asynchronously in an async method, replace `request.Execute()` as shown:
-            UpdateValuesResponse updateResponse = updateRequest.Execute();
-            // UpdateValuesResponse updateResponse = await updateRequest.ExecuteAsync();
+                SpreadsheetsResource.ValuesResource.UpdateRequest updateRequest = Service.Spreadsheets.Values.Update(updateRequestBody, SpreadsheetId, Name + "!S7");
+                updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.RAW;
+                // To execute asynchronously in an async method, replace `request.Execute()` as shown:
+                UpdateValuesResponse updateResponse = updateRequest.Execute();
+                // UpdateValuesResponse updateResponse = await updateRequest.ExecuteAsync();
+            });
         }
 
-        public void AddGameToSection(string section)
+        public async void AddGameToSection(string section)
         {
-            SpreadsheetsResource.ValuesResource.GetRequest request =
-                        Service.Spreadsheets.Values.Get(SpreadsheetId, Range);
-            Response = request.Execute();
-            IList<IList<object>> values = Response.Values;
-            if (values != null && values.Count > 2)
+            await Task.Factory.StartNew(() =>
             {
-                Console.WriteLine(1);
-                if (values[2] != null && values[2].Count > 1)
+                SpreadsheetsResource.ValuesResource.GetRequest request = Service.Spreadsheets.Values.Get(SpreadsheetId, Range);
+                Response = request.Execute();
+                IList<IList<object>> values = Response.Values;
+                if (values != null && values.Count > 2)
                 {
-                    Console.WriteLine(2);
-                    string sections = values[2][1].ToString();
-
-                    string splitter = section.Substring(1);
-                    Console.WriteLine(section);
-                    Console.WriteLine(sections);
-                    Console.WriteLine(splitter);
-                    splitter += "x";
-                    Console.WriteLine(splitter);
-                    Console.WriteLine("Sections before: " + sections);
-                    string[] splittedBySection = sections.Split(new string[] { splitter }, StringSplitOptions.None);
-                    if (splittedBySection.Count() > 1)
+                    Console.WriteLine(1);
+                    if (values[2] != null && values[2].Count > 1)
                     {
-                        Console.WriteLine(3);
+                        Console.WriteLine(2);
+                        string sections = values[2][1].ToString();
 
-                        Console.WriteLine("SplittedBySection[1] before: " + splittedBySection[1]);
-                        string[] splittedBySpaces = splittedBySection[1].Split(' ');
-
-                        for (int i = 0; i < splittedBySpaces.Count(); ++i)
-                        { Console.WriteLine("splittedBySpaces" + i + ": " + splittedBySpaces[i]); }
-                        if (splittedBySpaces.Count() > 0)
+                        string splitter = section.Substring(1);
+                        Console.WriteLine(section);
+                        Console.WriteLine(sections);
+                        Console.WriteLine(splitter);
+                        splitter += "x";
+                        Console.WriteLine(splitter);
+                        Console.WriteLine("Sections before: " + sections);
+                        string[] splittedBySection = sections.Split(new string[] { splitter }, StringSplitOptions.None);
+                        if (splittedBySection.Count() > 1)
                         {
-                            Console.WriteLine(4);
-                            if (splittedBySpaces[0].First() == '(')
+                            Console.WriteLine(3);
+
+                            Console.WriteLine("SplittedBySection[1] before: " + splittedBySection[1]);
+                            string[] splittedBySpaces = splittedBySection[1].Split(' ');
+
+                            for (int i = 0; i < splittedBySpaces.Count(); ++i)
+                            { Console.WriteLine("splittedBySpaces" + i + ": " + splittedBySpaces[i]); }
+                            if (splittedBySpaces.Count() > 0)
                             {
-                                Console.WriteLine(5);
-                                Console.WriteLine("SplittedBySpaces[0] before: " + splittedBySpaces[0]);
-                                string[] splittedByBrackets = splittedBySpaces[0].Split('(', '/', ')');
-                                if (splittedByBrackets.Count() > 2)
+                                Console.WriteLine(4);
+                                if (splittedBySpaces[0].First() == '(')
                                 {
-                                    Console.WriteLine(6);
-                                    int numGames = Convert.ToInt32(splittedByBrackets[2]);
+                                    Console.WriteLine(5);
+                                    Console.WriteLine("SplittedBySpaces[0] before: " + splittedBySpaces[0]);
+                                    string[] splittedByBrackets = splittedBySpaces[0].Split('(', '/', ')');
+                                    if (splittedByBrackets.Count() > 2)
+                                    {
+                                        Console.WriteLine(6);
+                                        int numGames = Convert.ToInt32(splittedByBrackets[2]);
+                                        ++numGames;
+                                        splittedByBrackets[2] = numGames.ToString();
+                                        splittedBySpaces[0] = "(" + splittedByBrackets[1] + "/" + splittedByBrackets[2] + ")";
+                                        Console.WriteLine("SplittedBySpaces[0] after: " + splittedBySpaces[0]);
+                                    }
+                                }
+                                else
+                                {
+                                    Console.WriteLine(7);
+                                    int numGames = Convert.ToInt32(splittedBySpaces[0]);
                                     ++numGames;
-                                    splittedByBrackets[2] = numGames.ToString();
-                                    splittedBySpaces[0] = "(" + splittedByBrackets[1] + "/" + splittedByBrackets[2] + ")";
+                                    splittedBySpaces[0] = numGames.ToString();
                                     Console.WriteLine("SplittedBySpaces[0] after: " + splittedBySpaces[0]);
                                 }
-                            }
-                            else
-                            {
-                                Console.WriteLine(7);
-                                int numGames = Convert.ToInt32(splittedBySpaces[0]);
-                                ++numGames;
-                                splittedBySpaces[0] = numGames.ToString();
-                                Console.WriteLine("SplittedBySpaces[0] after: " + splittedBySpaces[0]);
-                            }
-                            splittedBySection[1] = splittedBySpaces[0];
-                            if (splittedBySpaces.Count() > 1)
-                            {
-                                Console.WriteLine(9);
-                                for (int i = 1; i < splittedBySpaces.Count(); ++i)
+                                splittedBySection[1] = splittedBySpaces[0];
+                                if (splittedBySpaces.Count() > 1)
                                 {
-                                    splittedBySection[1] += " ";
-                                    splittedBySection[1] += splittedBySpaces[i];
+                                    Console.WriteLine(9);
+                                    for (int i = 1; i < splittedBySpaces.Count(); ++i)
+                                    {
+                                        splittedBySection[1] += " ";
+                                        splittedBySection[1] += splittedBySpaces[i];
+                                    }
                                 }
+                                Console.WriteLine("SplittedBySection[1] after: " + splittedBySection[1]);
                             }
-                            Console.WriteLine("SplittedBySection[1] after: " + splittedBySection[1]);
+                            Console.WriteLine(10);
+                            sections = splittedBySection[0] + splitter + splittedBySection[1];
+                            Console.WriteLine("Sections after: " + sections);
+                            var lobg = new List<object>() { sections };
+                            updateRequestBody = new ValueRange();
+                            updateRequestBody.Values = new List<IList<object>>() { lobg };
+                            SpreadsheetsResource.ValuesResource.UpdateRequest updateRequest = Service.Spreadsheets.Values.Update(updateRequestBody, SpreadsheetId, Name + "!B3");
+                            updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.RAW;
+                            UpdateValuesResponse updateResponse = updateRequest.Execute();
                         }
-                        Console.WriteLine(10);
-                        sections = splittedBySection[0] + splitter + splittedBySection[1];
-                        Console.WriteLine("Sections after: " + sections);
-                        var lobg = new List<object>() { sections };
-                        updateRequestBody = new ValueRange();
-                        updateRequestBody.Values = new List<IList<object>>() { lobg };
-                        SpreadsheetsResource.ValuesResource.UpdateRequest updateRequest = Service.Spreadsheets.Values.Update(updateRequestBody, SpreadsheetId, Name + "!B3");
-                        updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.RAW;
-                        UpdateValuesResponse updateResponse = updateRequest.Execute();
                     }
                 }
-            }
+            });
         }
+
+        public async void RerollCurrent()
+        {
+            await Task.Factory.StartNew(() =>
+            {
+
+                SpreadsheetsResource.ValuesResource.GetRequest request = Service.Spreadsheets.Values.Get(SpreadsheetId, Range);
+                Response = request.Execute();
+                IList<IList<object>> values = Response.Values;
+
+                // Finding index of row with last game (Maybe will add property LastGameId in the future)
+                int lastGameId = 0;
+                if (values != null && values.Count > 0)
+                {
+                    for (int i = 3; i < values.Count; ++i)
+                    {
+                        var row = values[i];
+                        if (row.Count > 4 && row[4] != null && !string.IsNullOrWhiteSpace(row[4].ToString()))
+                        {
+                            lastGameId = i;
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Can't find last game.");
+                    return;
+                }
+
+                //get sheet id by sheet name
+                Spreadsheet spr = Service.Spreadsheets.Get(SpreadsheetId).Execute();
+                Sheet sh = spr.Sheets.Where(s => s.Properties.Title == Name).FirstOrDefault();
+                int sheetId = (int)sh.Properties.SheetId;
+
+                //define cell background to light blue color
+                var userEnteredFormat = new CellFormat()
+                {
+                    BackgroundColor = new Color()
+                    {
+                        Red = 0.427451f,
+                        Green = 0.619608f,
+                        Blue = 0.921569f,
+                        Alpha = 1
+                    }
+                };
+                BatchUpdateSpreadsheetRequest bussr = new BatchUpdateSpreadsheetRequest();
+                
+                //create the update request for cells from the first row
+                var updateCellsRequest = new Request()
+                {
+                    RepeatCell = new RepeatCellRequest()
+                    {
+                        Range = new GridRange
+                        {
+                            SheetId = sheetId,
+                            StartColumnIndex = 5,
+                            StartRowIndex = lastGameId,
+                            EndColumnIndex = 6,
+                            EndRowIndex = lastGameId+1
+                        },
+                        Cell = new CellData()
+                        {
+                            UserEnteredFormat = userEnteredFormat,
+                            UserEnteredValue = new ExtendedValue()
+                            {
+                                StringValue = "Rerolled"
+                            }
+                        },
+                        Fields = "UserEnteredFormat(BackgroundColor),UserEnteredValue(StringValue)"
+                    }
+                };
+
+
+
+                bussr.Requests = new List<Request>();
+                bussr.Requests.Add(updateCellsRequest);
+                var bur = Service.Spreadsheets.BatchUpdate(bussr, SpreadsheetId);
+                bur.Execute();
+            });
+        }
+
+        public async void DropCurrent()
+        {
+            await Task.Factory.StartNew(() =>
+            {
+                
+                SpreadsheetsResource.ValuesResource.GetRequest request = Service.Spreadsheets.Values.Get(SpreadsheetId, Range);
+                Response = request.Execute();
+                IList<IList<object>> values = Response.Values;
+
+                // Finding index of row with last game (Maybe will add property LastGameId in the future)
+                int lastGameId = 0;
+                if (values != null && values.Count > 0)
+                {
+                    for (int i = 3; i < values.Count; ++i)
+                    {
+                        var row = values[i];
+                        if (row.Count > 4 && row[4] != null && !string.IsNullOrWhiteSpace(row[4].ToString()))
+                        {
+                            lastGameId = i;
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Can't find last game.");
+                    return;
+                }
+
+                //get sheet id by sheet name
+                Spreadsheet spr = Service.Spreadsheets.Get(SpreadsheetId).Execute();
+                Sheet sh = spr.Sheets.Where(s => s.Properties.Title == Name).FirstOrDefault();
+                int sheetId = (int)sh.Properties.SheetId;
+
+                //define cell background to light burgundy color
+                var userEnteredFormat = new CellFormat()
+                {
+                    BackgroundColor = new Color()
+                    {
+                        Blue = 0.1451f,
+                        Red = 0.8f,
+                        Green = 0.254902f,
+                        Alpha = 1
+                    }
+                };
+                BatchUpdateSpreadsheetRequest bussr = new BatchUpdateSpreadsheetRequest();
+                
+                //create the update request for cells from the first row
+                var updateCellsRequest = new Request()
+                {
+                    RepeatCell = new RepeatCellRequest()
+                    {
+                        Range = new GridRange
+                        {
+                            SheetId = sheetId,
+                            StartColumnIndex = 5,
+                            StartRowIndex = lastGameId,
+                            EndColumnIndex = 6,
+                            EndRowIndex = lastGameId + 1
+                        },
+                        Cell = new CellData()
+                        {
+                            UserEnteredFormat = userEnteredFormat,
+                            UserEnteredValue = new ExtendedValue()
+                            {
+                                StringValue = "Dropped"
+                            }
+                        },
+                        Fields = "UserEnteredFormat(BackgroundColor),UserEnteredValue(StringValue)"
+                    }
+                };
+
+
+
+                bussr.Requests = new List<Request>();
+                bussr.Requests.Add(updateCellsRequest);
+                var bur = Service.Spreadsheets.BatchUpdate(bussr, SpreadsheetId);
+                bur.Execute();
+            });
+        }
+
+        public async void CompleteCurrent()
+        {
+            await Task.Factory.StartNew(() =>
+            {
+                
+                SpreadsheetsResource.ValuesResource.GetRequest request = Service.Spreadsheets.Values.Get(SpreadsheetId, Range);
+                Response = request.Execute();
+                IList<IList<object>> values = Response.Values;
+
+                // Finding index of row with last game (Maybe will add property LastGameId in the future)
+                int lastGameId = 0;
+                if (values != null && values.Count > 0)
+                {
+                    for (int i = 3; i < values.Count; ++i)
+                    {
+                        var row = values[i];
+                        if (row.Count > 4 && row[4] != null && !string.IsNullOrWhiteSpace(row[4].ToString()))
+                        {
+                            lastGameId = i;
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Can't find last game.");
+                    return;
+                }
+
+                //get sheet id by sheet name
+                Spreadsheet spr = Service.Spreadsheets.Get(SpreadsheetId).Execute();
+                Sheet sh = spr.Sheets.Where(s => s.Properties.Title == Name).FirstOrDefault();
+                int sheetId = (int)sh.Properties.SheetId;
+
+                //define cell background to light green color
+                var userEnteredFormat = new CellFormat()
+                {
+                    BackgroundColor = new Color()
+                    {
+                        Red = 0.576471f,
+                        Green = 0.7686275f,
+                        Blue = 0.4901961f,
+                        Alpha = 1
+                    }
+                };
+                BatchUpdateSpreadsheetRequest bussr = new BatchUpdateSpreadsheetRequest();
+
+                //create the update request for cells from the first row
+                var updateCellsRequest = new Request()
+                {
+                    RepeatCell = new RepeatCellRequest()
+                    {
+                        Range = new GridRange
+                        {
+                            SheetId = sheetId,
+                            StartColumnIndex = 5,
+                            StartRowIndex = lastGameId,
+                            EndColumnIndex = 6,
+                            EndRowIndex = lastGameId + 1
+                        },
+                        Cell = new CellData()
+                        {
+                            UserEnteredFormat = userEnteredFormat,
+                            UserEnteredValue = new ExtendedValue()
+                            {
+                                StringValue = "Completed"
+                            }
+                        },
+                        Fields = "UserEnteredFormat(BackgroundColor),UserEnteredValue(StringValue)"
+                    }
+                };
+
+
+
+                bussr.Requests = new List<Request>();
+                bussr.Requests.Add(updateCellsRequest);
+                var bur = Service.Spreadsheets.BatchUpdate(bussr, SpreadsheetId);
+                bur.Execute();
+            });
+        }
+
+
     }
 }

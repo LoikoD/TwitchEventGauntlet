@@ -210,6 +210,21 @@ namespace TwitchEventGauntlet.ViewModels
             data.SetSubsNum(Subs, SubsNeed);
         }
 
+        public void Drop()
+        {
+            data.DropCurrent();
+        }
+
+        public void Reroll()
+        {
+            data.RerollCurrent();
+        }
+
+        public void Completed()
+        {
+            data.CompleteCurrent();
+        }
+
     }
 
 }

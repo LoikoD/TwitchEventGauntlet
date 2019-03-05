@@ -9,17 +9,10 @@ namespace TwitchEventGauntlet.ViewModels
 {
     class MainViewModel : Conductor<object>
     {
-        private string _gameSection;
-
-        public string GameSection
-        {
-            get { return _gameSection; }
-            set { _gameSection = value; }
-        }
         
         public void LoadFakerPage()
         {
-            ActivateItem(new StreamerViewModel("MistaFaker"));
+            ActivateItem(new StreamerViewModel("Mistafaker"));
         }
         public void LoadMelPage()
         {

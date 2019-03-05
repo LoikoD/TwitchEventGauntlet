@@ -4,19 +4,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TwitchEventGauntlet.Models;
 
 namespace TwitchEventGauntlet.ViewModels
 {
     public class StreamerViewModel : Screen
     {
 
-        private string _color;
-        private string _gameName;
-        private string _section;
-        private int _leftGames;
-        private int _sumGames;
-        private int _subs;
-        private int _subsNeed;
+        private string _color = "White";
+        private string _gameName = "";
+        private string _section = "";
+        private int _leftGames = 0;
+        private int _completedGames = 0;
+        private int _subs = 0;
+        private int _subsNeed = 0;
+        private bool _isLoading = false;
 
         public int Id { get; set; }
         public string Name { get; set; }
@@ -51,22 +53,40 @@ namespace TwitchEventGauntlet.ViewModels
 
             }
         }
-        public int SumGames
+        public int CompletedGames
         {
-            get { return _sumGames; }
+            get { return _completedGames; }
             set
             {
-                _sumGames = value;
-                NotifyOfPropertyChange(() => SumGames);
+                _completedGames = value;
+                NotifyOfPropertyChange(() => CompletedGames);
                 NotifyOfPropertyChange(() => SectionStr);
 
+            }
+        }
+        public string NumGamesStr
+        {
+            get { return CompletedGames + "/" + LeftGames; }
+            set
+            {
+                string[] values = value.Split('/');
+                if (values.Count() > 1)
+                {
+                    CompletedGames = Convert.ToInt32(values[0]);
+                    LeftGames = Convert.ToInt32(values[1]);
+                }
+                else
+                {
+                    CompletedGames = 0;
+                    LeftGames = Convert.ToInt32(values[0]);
+                }
             }
         }
         public string SectionStr
         {
             get
             {
-                return Section + " (" + LeftGames + "/" + SumGames + ")";
+                return Section + " (" + CompletedGames + "/" + LeftGames + ")";
             }
         }
         public string GameName
@@ -81,6 +101,12 @@ namespace TwitchEventGauntlet.ViewModels
         public string SubGoalStr
         {
             get { return Subs + "/" + SubsNeed; }
+            set
+            {
+                string[] values = value.Split('/', ' ');
+                Subs = Convert.ToInt32(values[0]);
+                SubsNeed = Convert.ToInt32(values[1]);
+            }
         }
         public int Subs
         {
@@ -102,58 +128,73 @@ namespace TwitchEventGauntlet.ViewModels
                 NotifyOfPropertyChange(() => SubGoalStr);
             }
         }
-
-
-
-
-
-
-
-
-
-
-
+        public bool IsLoading
+        {
+            get { return _isLoading; }
+            set
+            {
+                _isLoading = value;
+                NotifyOfPropertyChange(() => IsLoading);
+            }
+        }
+        
+        public Data data = new Data();
+        
         public StreamerViewModel(string name)
         {
-            Name = name;
-            switch (Name)
+            IsLoading = false;
+            OverlayService.GetInstance().Show = (str) =>
             {
-                case "MistaFaker":
-                    Id = 0;
-                    Color = "Orange";
-                    GameName = "Puzzle3000";
-                    Section = "200-400";
-                    Subs = 0;
-                    SubsNeed = 25;
-                    break;
-                case "Melharucos":
-                    Id = 1;
-                    Color = "Yellow";
-                    GameName = "RacePRO";
-                    Section = "100-200";
-                    Subs = 1;
-                    SubsNeed = 20;
-                    break;
-                case "UncleBjorn":
-                    Id = 2;
-                    Color = "Green";
-                    GameName = "haHAA";
-                    Section = "0-100";
-                    Subs = 2;
-                    SubsNeed = 15;
-                    break;
-                case "Lasqa":
-                    Id = 3;
-                    Color = "Blue";
-                    GameName = "3Head";
-                    Section = "1500+";
-                    Subs = 3;
-                    SubsNeed = 10;
-                    break;
-                default:
-                    Color = "White";
-                    break;
-            }
+                OverlayService.GetInstance().Text = str;
+            };
+            UpdateInfo(name);
+            
+            
+        }
+
+        public async void UpdateInfo(string name)
+        {
+            await Task.Factory.StartNew(() =>
+            {
+                IsLoading = true;
+
+
+                Name = name;
+                data.Name = Name;
+                GameName = data.GetGames().Last();
+                Section = data.GetCurrentSection();
+                SubGoalStr = data.GetSubGoal();
+                NumGamesStr = data.GetNumGames();
+                switch (Name)
+                {
+                    case "Mistafaker":
+
+                        Id = 0;
+                        Color = "Orange";
+                        break;
+                    case "Melharucos":
+                        Id = 1;
+                        Color = "Yellow";
+                        break;
+                    case "UncleBjorn":
+                        Id = 2;
+                        Color = "Green";
+                        break;
+                    case "Lasqa":
+                        Id = 3;
+                        Color = "Blue";
+                        break;
+                    default:
+                        Color = "White";
+                        break;
+                }
+
+
+
+            });
+
+            //Task.Delay(500).Wait();
+            IsLoading = false;
         }
 
         public void AddSub()
@@ -163,8 +204,12 @@ namespace TwitchEventGauntlet.ViewModels
             {
                 Subs -= SubsNeed;
                 SubsNeed += 5;
-                SumGames++;
+                LeftGames++;
+                data.AddGameToSection(Section);
             }
+            data.SetSubsNum(Subs, SubsNeed);
         }
+
     }
+
 }

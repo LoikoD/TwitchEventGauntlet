@@ -18,6 +18,8 @@ namespace TwitchEventGauntlet.Models
     {
         public string GameName { get; set; }
         private string _name;
+        private int _lastGameId;
+
         public string Name
         {   get { return _name; }
             set
@@ -30,6 +32,12 @@ namespace TwitchEventGauntlet.Models
                 Response = request.Execute();
             }
         }
+        public int LastGameId
+        {
+            get { return _lastGameId; }
+            set { _lastGameId = value; }
+        }
+
         public string SpreadsheetId { get; set; }
         public string Range { get; set; }
         public SheetsService Service { get; set; }
@@ -66,15 +74,11 @@ namespace TwitchEventGauntlet.Models
             });
 
             // Define request parameters.
-            SpreadsheetId = "1SFZfSn2gmD0jjsTWrsrx0UJDws8k6cBD4ydfKAL4L2M";
+            SpreadsheetId = "1-at-FSQXIr9epC5bSd-0zDppJxYokceDhWE4jNTWP20";
             Range = Name + "!A:S";
             SpreadsheetsResource.ValuesResource.GetRequest request =
                     Service.Spreadsheets.Values.Get(SpreadsheetId, Range);
             Response = request.Execute();
-
-
-            
-
 
         }
 
@@ -84,13 +88,22 @@ namespace TwitchEventGauntlet.Models
             if (values != null && values.Count > 0)
             {
                 List<string> Games = new List<string>();
+                Console.WriteLine("Data.GetGames(): values.Count = " + values.Count);
                 for (int i = 3; i < values.Count; ++i)
                 {
                     var row = values[i];
                     if (row.Count > 4 && row[4] != null && !string.IsNullOrWhiteSpace(row[4].ToString()))
                     {
                         Games.Add(row[4].ToString());
+                        LastGameId = i;
                     }
+                }
+                Sheet sh = Service.Spreadsheets.Get(SpreadsheetId).Execute().Sheets.Where(s => s.Properties.Title == Name).FirstOrDefault();
+                GridRange merge = sh.Merges.Where(m => m.StartRowIndex == LastGameId && m.StartColumnIndex == 4).FirstOrDefault();
+                int? index = merge?.EndRowIndex;
+                if (index != null)
+                {
+                    LastGameId = index.GetValueOrDefault() - 1;
                 }
                 return Games;
             }
@@ -118,96 +131,75 @@ namespace TwitchEventGauntlet.Models
             return null;
         }
 
-        public string GetNumGames()
+        public string GetNumGames(string section)
         {
             IList<IList<object>> values = Response.Values;
             string games;
             if (values != null && values.Count > 2)
             {
                 games = values[2][1].ToString();
-                string[] gamesSplit = games.Split('(', ')');
-                if (gamesSplit.Count() > 1)
+                int sectionId = 1;
+                switch (section)
                 {
-                    return gamesSplit[1];
+                    case "0-100":
+                        sectionId = 1;
+                        break;
+                    case "100-200":
+                        sectionId = 2;
+                        break;
+                    case "200-400":
+                        sectionId = 3;
+                        break;
+                    case "400-550":
+                        sectionId = 4;
+                        break;
+                    case "550-700":
+                        sectionId = 5;
+                        break;
+                    case "700-1000":
+                        sectionId = 6;
+                        break;
+                    case "1000-1500":
+                        sectionId = 7;
+                        break;
+                    case "1500+":
+                        sectionId = 8;
+                        break;
+                    default:
+                        sectionId = 1;
+                        break;
                 }
-                else
+                int index = sectionId * 2 - 1;
+                List<string> sectionAndNums = games.Split('x', ' ', 'х').ToList();
+                for (int i = 0; i < sectionAndNums.Count; ++i)
                 {
-                    string curSection = "";
-                    for (int i = 3; i < values.Count(); ++i)
+                    if (string.IsNullOrWhiteSpace(sectionAndNums[i]))
                     {
-                        var row = values[i];
-                        if (row.Count > 3 && row[3] != null && !string.IsNullOrWhiteSpace(row[3].ToString()))
+                        sectionAndNums.RemoveAt(i);
+                        --i;
+                    }
+                }
+                if (sectionAndNums.Count > index)
+                {
+                    if (sectionAndNums[index].First() == '(')
+                    {
+                        string[] gamesSplit = sectionAndNums[index].Split('(', ')');
+                        if (gamesSplit.Count() > 1)
                         {
-                            curSection = row[3].ToString();
-                            Console.WriteLine(curSection);
+                            return gamesSplit[1];
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Can't find number of games");
                         }
                     }
-
-                    int sectionId = 1;
-                    switch (curSection)
-                    {
-                        case "0-100":
-                            sectionId = 1;
-                            break;
-                        case "100-200":
-                            sectionId = 2;
-                            break;
-                        case "200-400":
-                            sectionId = 3;
-                            break;
-                        case "400-550":
-                            sectionId = 4;
-                            break;
-                        case "550-700":
-                            sectionId = 5;
-                            break;
-                        case "700-1000":
-                            sectionId = 6;
-                            break;
-                        case "1000-1500":
-                            sectionId = 7;
-                            break;
-                        case "1500+":
-                            sectionId = 8;
-                            break;
-                        default:
-                            sectionId = 1;
-                            break;
-
-                    }
-
-                    Console.WriteLine(sectionId);
-                    int index = sectionId * 2 - 1;
-
-                    Console.WriteLine(index);
-
-                    List<string> sectionAndNums = gamesSplit[0].Split('x', ' ').ToList();
-
-                    foreach (string element in sectionAndNums)
-                    {
-                        Console.WriteLine(element);
-                    }
-                    for (int i = 0; i < sectionAndNums.Count; ++i)
-                    {
-                        if (string.IsNullOrWhiteSpace(sectionAndNums[i]))
-                        {
-                            Console.WriteLine("Deleting " + sectionAndNums[i]);
-                            sectionAndNums.RemoveAt(i);
-                            --i;
-                        }
-                    }
-                    foreach(string element in sectionAndNums)
-                    {
-                        Console.WriteLine(element);
-                    }
-                    if (sectionAndNums.Count > index)
+                    else
                     {
                         return sectionAndNums[index];
                     }
                 }
             }
-            Console.WriteLine("No data found.");
-            return null;
+            throw new ArgumentException("Can't find number of games");
         }
 
         public string GetCurrentSection()
@@ -222,7 +214,6 @@ namespace TwitchEventGauntlet.Models
                     if (row.Count > 3 && row[3] != null && !string.IsNullOrWhiteSpace(row[3].ToString()))
                     {
                         curSection = row[3].ToString();
-                        Console.WriteLine(curSection);
                     }
                 }
                 return curSection;
@@ -256,70 +247,140 @@ namespace TwitchEventGauntlet.Models
                 IList<IList<object>> values = Response.Values;
                 if (values != null && values.Count > 2)
                 {
-                    Console.WriteLine(1);
                     if (values[2] != null && values[2].Count > 1)
                     {
-                        Console.WriteLine(2);
                         string sections = values[2][1].ToString();
 
                         string splitter = section.Substring(1);
-                        Console.WriteLine(section);
-                        Console.WriteLine(sections);
-                        Console.WriteLine(splitter);
+                        string splitterRus = splitter + "х";
                         splitter += "x";
-                        Console.WriteLine(splitter);
-                        Console.WriteLine("Sections before: " + sections);
-                        string[] splittedBySection = sections.Split(new string[] { splitter }, StringSplitOptions.None);
+                        string[] splittedBySection = sections.Split(new string[] { splitter, splitterRus }, StringSplitOptions.None);
                         if (splittedBySection.Count() > 1)
                         {
-                            Console.WriteLine(3);
-
-                            Console.WriteLine("SplittedBySection[1] before: " + splittedBySection[1]);
                             string[] splittedBySpaces = splittedBySection[1].Split(' ');
-
-                            for (int i = 0; i < splittedBySpaces.Count(); ++i)
-                            { Console.WriteLine("splittedBySpaces" + i + ": " + splittedBySpaces[i]); }
+                            
                             if (splittedBySpaces.Count() > 0)
                             {
-                                Console.WriteLine(4);
                                 if (splittedBySpaces[0].First() == '(')
                                 {
-                                    Console.WriteLine(5);
-                                    Console.WriteLine("SplittedBySpaces[0] before: " + splittedBySpaces[0]);
                                     string[] splittedByBrackets = splittedBySpaces[0].Split('(', '/', ')');
                                     if (splittedByBrackets.Count() > 2)
                                     {
-                                        Console.WriteLine(6);
                                         int numGames = Convert.ToInt32(splittedByBrackets[2]);
                                         ++numGames;
                                         splittedByBrackets[2] = numGames.ToString();
                                         splittedBySpaces[0] = "(" + splittedByBrackets[1] + "/" + splittedByBrackets[2] + ")";
-                                        Console.WriteLine("SplittedBySpaces[0] after: " + splittedBySpaces[0]);
+                                    }
+                                    else
+                                    {
+                                        throw new ArgumentException("Can't find information about sections");
                                     }
                                 }
                                 else
                                 {
-                                    Console.WriteLine(7);
                                     int numGames = Convert.ToInt32(splittedBySpaces[0]);
                                     ++numGames;
                                     splittedBySpaces[0] = numGames.ToString();
-                                    Console.WriteLine("SplittedBySpaces[0] after: " + splittedBySpaces[0]);
                                 }
                                 splittedBySection[1] = splittedBySpaces[0];
                                 if (splittedBySpaces.Count() > 1)
                                 {
-                                    Console.WriteLine(9);
                                     for (int i = 1; i < splittedBySpaces.Count(); ++i)
                                     {
                                         splittedBySection[1] += " ";
                                         splittedBySection[1] += splittedBySpaces[i];
                                     }
                                 }
-                                Console.WriteLine("SplittedBySection[1] after: " + splittedBySection[1]);
+                                else
+                                {
+                                    throw new ArgumentException("Can't find information about sections");
+                                }
                             }
-                            Console.WriteLine(10);
+                            else
+                            {
+                                throw new ArgumentException("Can't find information about sections");
+                            }
                             sections = splittedBySection[0] + splitter + splittedBySection[1];
-                            Console.WriteLine("Sections after: " + sections);
+                            var lobg = new List<object>() { sections };
+                            updateRequestBody = new ValueRange();
+                            updateRequestBody.Values = new List<IList<object>>() { lobg };
+                            SpreadsheetsResource.ValuesResource.UpdateRequest updateRequest = Service.Spreadsheets.Values.Update(updateRequestBody, SpreadsheetId, Name + "!B3");
+                            updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.RAW;
+                            UpdateValuesResponse updateResponse = updateRequest.Execute();
+                        }
+                        else
+                        {
+                            throw new ArgumentException("Can't find information about sections");
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Can't find information about sections");
+                    }
+                }
+                else
+                {
+                    throw new ArgumentException("Can't find information about sections");
+                }
+            });
+        }
+
+        public async void AddCompletedGameToSection(string section)
+        {
+            await Task.Factory.StartNew(() =>
+            {
+                SpreadsheetsResource.ValuesResource.GetRequest request = Service.Spreadsheets.Values.Get(SpreadsheetId, Range);
+                Response = request.Execute();
+                IList<IList<object>> values = Response.Values;
+                if (values != null && values.Count > 2)
+                {
+                    if (values[2] != null && values[2].Count > 1)
+                    {
+                        string sections = values[2][1].ToString();
+
+                        string splitter = section.Substring(1);
+                        splitter += "x";
+                        string[] splittedBySection = sections.Split(new string[] { splitter }, StringSplitOptions.None);
+                        if (splittedBySection.Count() > 1)
+                        {
+                            string[] splittedBySpaces = splittedBySection[1].Split(' ');
+                            
+                            if (splittedBySpaces.Count() > 0)
+                            {
+                                if (splittedBySpaces[0].First() == '(')
+                                {
+                                    string[] splittedByBrackets = splittedBySpaces[0].Split('(', '/', ')');
+                                    if (splittedByBrackets.Count() > 2)
+                                    {
+                                        int numGames = Convert.ToInt32(splittedByBrackets[1]);
+                                        ++numGames;
+                                        if (numGames == Convert.ToInt32(splittedByBrackets[2]))
+                                        {
+                                            splittedBySpaces[0] = numGames.ToString();
+                                        }
+                                        else
+                                        {
+                                            splittedByBrackets[1] = numGames.ToString();
+                                            splittedBySpaces[0] = "(" + splittedByBrackets[1] + "/" + splittedByBrackets[2] + ")";
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    int numGames = Convert.ToInt32(splittedBySpaces[0]);
+                                    splittedBySpaces[0] = "(1/" + splittedBySpaces[0] + ")";
+                                }
+                                splittedBySection[1] = splittedBySpaces[0];
+                                if (splittedBySpaces.Count() > 1)
+                                {
+                                    for (int i = 1; i < splittedBySpaces.Count(); ++i)
+                                    {
+                                        splittedBySection[1] += " ";
+                                        splittedBySection[1] += splittedBySpaces[i];
+                                    }
+                                }
+                            }
+                            sections = splittedBySection[0] + splitter + splittedBySection[1];
                             var lobg = new List<object>() { sections };
                             updateRequestBody = new ValueRange();
                             updateRequestBody.Values = new List<IList<object>>() { lobg };
@@ -336,29 +397,8 @@ namespace TwitchEventGauntlet.Models
         {
             await Task.Factory.StartNew(() =>
             {
-
-                SpreadsheetsResource.ValuesResource.GetRequest request = Service.Spreadsheets.Values.Get(SpreadsheetId, Range);
-                Response = request.Execute();
-                IList<IList<object>> values = Response.Values;
-
-                // Finding index of row with last game (Maybe will add property LastGameId in the future)
-                int lastGameId = 0;
-                if (values != null && values.Count > 0)
-                {
-                    for (int i = 3; i < values.Count; ++i)
-                    {
-                        var row = values[i];
-                        if (row.Count > 4 && row[4] != null && !string.IsNullOrWhiteSpace(row[4].ToString()))
-                        {
-                            lastGameId = i;
-                        }
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Can't find last game.");
-                    return;
-                }
+                int prevGameId = LastGameId;
+                LastGameId++;
 
                 //get sheet id by sheet name
                 Spreadsheet spr = Service.Spreadsheets.Get(SpreadsheetId).Execute();
@@ -387,9 +427,9 @@ namespace TwitchEventGauntlet.Models
                         {
                             SheetId = sheetId,
                             StartColumnIndex = 5,
-                            StartRowIndex = lastGameId,
+                            StartRowIndex = prevGameId,
                             EndColumnIndex = 6,
-                            EndRowIndex = lastGameId+1
+                            EndRowIndex = prevGameId + 1
                         },
                         Cell = new CellData()
                         {
@@ -416,29 +456,8 @@ namespace TwitchEventGauntlet.Models
         {
             await Task.Factory.StartNew(() =>
             {
-                
-                SpreadsheetsResource.ValuesResource.GetRequest request = Service.Spreadsheets.Values.Get(SpreadsheetId, Range);
-                Response = request.Execute();
-                IList<IList<object>> values = Response.Values;
-
-                // Finding index of row with last game (Maybe will add property LastGameId in the future)
-                int lastGameId = 0;
-                if (values != null && values.Count > 0)
-                {
-                    for (int i = 3; i < values.Count; ++i)
-                    {
-                        var row = values[i];
-                        if (row.Count > 4 && row[4] != null && !string.IsNullOrWhiteSpace(row[4].ToString()))
-                        {
-                            lastGameId = i;
-                        }
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Can't find last game.");
-                    return;
-                }
+                int prevGameId = LastGameId;
+                LastGameId++;
 
                 //get sheet id by sheet name
                 Spreadsheet spr = Service.Spreadsheets.Get(SpreadsheetId).Execute();
@@ -467,9 +486,9 @@ namespace TwitchEventGauntlet.Models
                         {
                             SheetId = sheetId,
                             StartColumnIndex = 5,
-                            StartRowIndex = lastGameId,
+                            StartRowIndex = prevGameId,
                             EndColumnIndex = 6,
-                            EndRowIndex = lastGameId + 1
+                            EndRowIndex = prevGameId + 1
                         },
                         Cell = new CellData()
                         {
@@ -483,8 +502,6 @@ namespace TwitchEventGauntlet.Models
                     }
                 };
 
-
-
                 bussr.Requests = new List<Request>();
                 bussr.Requests.Add(updateCellsRequest);
                 var bur = Service.Spreadsheets.BatchUpdate(bussr, SpreadsheetId);
@@ -496,29 +513,8 @@ namespace TwitchEventGauntlet.Models
         {
             await Task.Factory.StartNew(() =>
             {
-                
-                SpreadsheetsResource.ValuesResource.GetRequest request = Service.Spreadsheets.Values.Get(SpreadsheetId, Range);
-                Response = request.Execute();
-                IList<IList<object>> values = Response.Values;
-
-                // Finding index of row with last game (Maybe will add property LastGameId in the future)
-                int lastGameId = 0;
-                if (values != null && values.Count > 0)
-                {
-                    for (int i = 3; i < values.Count; ++i)
-                    {
-                        var row = values[i];
-                        if (row.Count > 4 && row[4] != null && !string.IsNullOrWhiteSpace(row[4].ToString()))
-                        {
-                            lastGameId = i;
-                        }
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Can't find last game.");
-                    return;
-                }
+                int prevGameId = LastGameId;
+                LastGameId++;
 
                 //get sheet id by sheet name
                 Spreadsheet spr = Service.Spreadsheets.Get(SpreadsheetId).Execute();
@@ -547,9 +543,9 @@ namespace TwitchEventGauntlet.Models
                         {
                             SheetId = sheetId,
                             StartColumnIndex = 5,
-                            StartRowIndex = lastGameId,
+                            StartRowIndex = prevGameId,
                             EndColumnIndex = 6,
-                            EndRowIndex = lastGameId + 1
+                            EndRowIndex = prevGameId + 1
                         },
                         Cell = new CellData()
                         {
@@ -563,15 +559,97 @@ namespace TwitchEventGauntlet.Models
                     }
                 };
 
-
-
                 bussr.Requests = new List<Request>();
                 bussr.Requests.Add(updateCellsRequest);
                 var bur = Service.Spreadsheets.BatchUpdate(bussr, SpreadsheetId);
                 bur.Execute();
+
             });
         }
 
+        public async void SetNewGameSectionField(string section)
+        {
+            await Task.Factory.StartNew(() =>
+            {
+                //Task.Delay(1000).Wait(); //Maybe for a bit delay between two async data methods
+                var lobg = new List<object>() { section };
+                updateRequestBody = new ValueRange();
+                updateRequestBody.Values = new List<IList<object>>() { lobg };
+                SpreadsheetsResource.ValuesResource.UpdateRequest updateRequest = Service.Spreadsheets.Values.Update(updateRequestBody, SpreadsheetId, Name + "!D" + (LastGameId+1).ToString());
+                updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.RAW;
+                UpdateValuesResponse updateResponse = updateRequest.Execute();
+            });
+        }
 
+        public async void SetNewGameNameField(string name)
+        {
+            await Task.Factory.StartNew(() =>
+            {
+                var lobg = new List<object>() { name };
+                updateRequestBody = new ValueRange();
+                updateRequestBody.Values = new List<IList<object>>() { lobg };
+                SpreadsheetsResource.ValuesResource.UpdateRequest updateRequest = Service.Spreadsheets.Values.Update(updateRequestBody, SpreadsheetId, Name + "!E" + (LastGameId + 1).ToString());
+                updateRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.UpdateRequest.ValueInputOptionEnum.RAW;
+                UpdateValuesResponse updateResponse = updateRequest.Execute();
+                SetResultFieldToStarted();
+            });
+        }
+
+        public void SetResultFieldToStarted()
+        {
+            //get sheet id by sheet name
+            Spreadsheet spr = Service.Spreadsheets.Get(SpreadsheetId).Execute();
+            Sheet sh = spr.Sheets.Where(s => s.Properties.Title == Name).FirstOrDefault();
+            int sheetId = (int)sh.Properties.SheetId;
+
+            //define cell background to light yellow color
+            var userEnteredFormat = new CellFormat()
+            {
+                BackgroundColor = new Color()
+                {
+                    Red = 1,
+                    Green = 0.8509804f,
+                    Blue = 0.4f,
+                    Alpha = 1
+                }
+            };
+            BatchUpdateSpreadsheetRequest bussr = new BatchUpdateSpreadsheetRequest();
+
+            //create the update request for cells from the first row
+            var updateCellsRequest = new Request()
+            {
+                RepeatCell = new RepeatCellRequest()
+                {
+                    Range = new GridRange
+                    {
+                        SheetId = sheetId,
+                        StartColumnIndex = 5,
+                        StartRowIndex = LastGameId,
+                        EndColumnIndex = 6,
+                        EndRowIndex = LastGameId + 1
+                    },
+                    Cell = new CellData()
+                    {
+                        UserEnteredFormat = userEnteredFormat,
+                        UserEnteredValue = new ExtendedValue()
+                        {
+                            StringValue = "Started"
+                        }
+                    },
+                    Fields = "UserEnteredFormat(BackgroundColor),UserEnteredValue(StringValue)"
+                }
+            };
+
+            bussr.Requests = new List<Request>();
+            bussr.Requests.Add(updateCellsRequest);
+            var bur = Service.Spreadsheets.BatchUpdate(bussr, SpreadsheetId);
+            bur.Execute();
+        }
+
+       /* public List<Item> GetItemList()
+        {
+            List<Item> items = new List<Item>();
+
+        }*/
     }
 }

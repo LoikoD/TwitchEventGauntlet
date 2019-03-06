@@ -19,6 +19,10 @@ namespace TwitchEventGauntlet.ViewModels
         private int _subs = 0;
         private int _subsNeed = 0;
         private bool _isLoading = false;
+        private string _itemDescription;
+
+        private InfoViewModel infoViewModel;
+        private IWindowManager WindowManager;
 
         public int Id { get; set; }
         public string Name { get; set; }
@@ -38,6 +42,7 @@ namespace TwitchEventGauntlet.ViewModels
             set
             {
                 _section = value;
+                infoViewModel.Section = Section;
                 NotifyOfPropertyChange(() => Section);
                 NotifyOfPropertyChange(() => SectionStr);
             }
@@ -48,6 +53,7 @@ namespace TwitchEventGauntlet.ViewModels
             set
             {
                 _leftGames = value;
+                infoViewModel.LeftGames = LeftGames;
                 NotifyOfPropertyChange(() => LeftGames);
                 NotifyOfPropertyChange(() => SectionStr);
 
@@ -59,6 +65,7 @@ namespace TwitchEventGauntlet.ViewModels
             set
             {
                 _completedGames = value;
+                infoViewModel.CompletedGames = CompletedGames;
                 NotifyOfPropertyChange(() => CompletedGames);
                 NotifyOfPropertyChange(() => SectionStr);
 
@@ -95,6 +102,7 @@ namespace TwitchEventGauntlet.ViewModels
             set
             {
                 _gameName = value;
+                infoViewModel.GameName = GameName;
                 NotifyOfPropertyChange(() => GameName);
             }
         }
@@ -106,6 +114,9 @@ namespace TwitchEventGauntlet.ViewModels
                 string[] values = value.Split('/', ' ');
                 Subs = Convert.ToInt32(values[0]);
                 SubsNeed = Convert.ToInt32(values[1]);
+                infoViewModel.Subs = Convert.ToInt32(values[0]);
+                infoViewModel.SubsNeed = Convert.ToInt32(values[1]);
+
             }
         }
         public int Subs
@@ -114,6 +125,7 @@ namespace TwitchEventGauntlet.ViewModels
             set
             {
                 _subs = value;
+                infoViewModel.Subs = Subs;
                 NotifyOfPropertyChange(() => Subs);
                 NotifyOfPropertyChange(() => SubGoalStr);
             }
@@ -124,6 +136,7 @@ namespace TwitchEventGauntlet.ViewModels
             set
             {
                 _subsNeed = value;
+                infoViewModel.SubsNeed = SubsNeed;
                 NotifyOfPropertyChange(() => SubsNeed);
                 NotifyOfPropertyChange(() => SubGoalStr);
             }
@@ -137,11 +150,24 @@ namespace TwitchEventGauntlet.ViewModels
                 NotifyOfPropertyChange(() => IsLoading);
             }
         }
-        
+        public string ItemDescription
+        {
+            get { return _itemDescription; }
+            set
+            {
+                _itemDescription = value;
+                NotifyOfPropertyChange(() => ItemDescription);
+            }
+        }
+        public List<Item> items;
+
         public Data data = new Data();
-        
+
+
         public StreamerViewModel(string name)
         {
+            infoViewModel = new InfoViewModel();
+            WindowManager = new WindowManager();
             IsLoading = false;
             OverlayService.GetInstance().Show = (str) =>
             {
@@ -164,7 +190,9 @@ namespace TwitchEventGauntlet.ViewModels
                 GameName = data.GetGames().Last();
                 Section = data.GetCurrentSection();
                 SubGoalStr = data.GetSubGoal();
-                NumGamesStr = data.GetNumGames();
+                NumGamesStr = data.GetNumGames(Section);
+                items = new List<Item>();
+                //Items = data.GetItemList();
                 switch (Name)
                 {
                     case "Mistafaker":
@@ -213,18 +241,179 @@ namespace TwitchEventGauntlet.ViewModels
         public void Drop()
         {
             data.DropCurrent();
+            PrevSection();
+            data.SetNewGameSectionField(Section);
+            WindowManager = new WindowManager();
+            NewGameViewModel newGameViewModel = new NewGameViewModel();
+            while (true)
+            {
+                if (WindowManager.ShowDialog(newGameViewModel) == true)
+                {
+                    GameName = newGameViewModel.GameName;
+                    data.SetNewGameNameField(GameName);
+                    return;
+                }
+            }
         }
 
         public void Reroll()
         {
             data.RerollCurrent();
+            data.SetNewGameSectionField(Section);
+            WindowManager = new WindowManager();
+            NewGameViewModel newGameViewModel = new NewGameViewModel();
+            while (true)
+            {
+                if (WindowManager.ShowDialog(newGameViewModel) == true)
+                {
+                    GameName = newGameViewModel.GameName;
+                    data.SetNewGameNameField(GameName);
+                    return;
+                }
+            }
         }
-
         public void Completed()
         {
             data.CompleteCurrent();
+            CompletedGames++;
+            data.AddCompletedGameToSection(Section);
+            if (CompletedGames == LeftGames)
+            {
+                CompletedGames = 0;
+                NextSection();
+            }
+            data.SetNewGameSectionField(Section);
+            WindowManager = new WindowManager();
+            NewGameViewModel newGameViewModel = new NewGameViewModel();
+            while (true)
+            {
+                if (WindowManager.ShowDialog(newGameViewModel) == true)
+                {
+                    GameName = newGameViewModel.GameName;
+                    data.SetNewGameNameField(GameName);
+                    return;
+                }
+            }
         }
 
+        public void NextSection()
+        {
+            switch (Section)
+            {
+                case "0-100":
+                    Section = "100-200";
+                    NumGamesStr = data.GetNumGames(Section);
+                    break;
+                case "100-200":
+                    Section = "200-400";
+                    NumGamesStr = data.GetNumGames(Section);
+                    break;
+                case "200-400":
+                    Section = "400-550";
+                    NumGamesStr = data.GetNumGames(Section);
+                    break;
+                case "400-550":
+                    Section = "550-700";
+                    NumGamesStr = data.GetNumGames(Section);
+                    break;
+                case "550-700":
+                    Section = "700-1000";
+                    NumGamesStr = data.GetNumGames(Section);
+                    break;
+                case "700-1000":
+                    Section = "1000-1500";
+                    NumGamesStr = data.GetNumGames(Section);
+                    break;
+                case "1000-1500":
+                    Section = "1500+";
+                    NumGamesStr = data.GetNumGames(Section);
+                    break;
+                case "1500+":
+                    EndChallenge();
+                    break;
+                default:
+                    throw new ArgumentException("ERROR: Previous section unknowned");
+            }
+        }
+
+
+        public void PrevSection()
+        {
+            switch (Section)
+            {
+                case "0-100":
+                    LeftGames++;
+                    data.AddGameToSection(Section);
+                    break;
+                case "100-200":
+                    Section = "0-100";
+                    NumGamesStr = data.GetNumGames(Section);
+                    LeftGames++;
+                    data.AddGameToSection(Section);
+                    break;
+                case "200-400":
+                    Section = "100-200";
+                    NumGamesStr = data.GetNumGames(Section);
+                    LeftGames++;
+                    data.AddGameToSection(Section);
+                    break;
+                case "400-550":
+                    Section = "200-400";
+                    NumGamesStr = data.GetNumGames(Section);
+                    LeftGames++;
+                    data.AddGameToSection(Section);
+                    break;
+                case "550-700":
+                    Section = "400-550";
+                    NumGamesStr = data.GetNumGames(Section);
+                    LeftGames++;
+                    data.AddGameToSection(Section);
+                    break;
+                case "700-1000":
+                    Section = "550-700";
+                    NumGamesStr = data.GetNumGames(Section);
+                    LeftGames++;
+                    data.AddGameToSection(Section);
+                    break;
+                case "1000-1500":
+                    Section = "700-1000";
+                    NumGamesStr = data.GetNumGames(Section);
+                    LeftGames++;
+                    data.AddGameToSection(Section);
+                    break;
+                case "1500+":
+                    Section = "1000-1500";
+                    NumGamesStr = data.GetNumGames(Section);
+                    LeftGames++;
+                    data.AddGameToSection(Section);
+                    break;
+                default:
+                    throw new ArgumentException("ERROR: Previous section unknowned");
+            }
+        }
+
+        public void EndChallenge()
+        {
+            throw new NotImplementedException("Congratulations! You've finished the challenge, but unfortunately this case has not been implemented yet. We're sorry!");
+        }
+
+        public void OpenInfoWindow()
+        {
+            WindowManager = new WindowManager();
+            WindowManager.ShowWindow(infoViewModel);
+        }
+
+        public void ItemHover(int num)
+        {
+            switch (num)
+            {
+                case 1:
+                {
+                        ItemDescription = "Корона короля Петучей. Шмотка. Бафф.";
+                    break;
+                }
+            }
+        }
     }
 
 }

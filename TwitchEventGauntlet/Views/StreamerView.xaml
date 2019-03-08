@@ -64,9 +64,9 @@
 
             <!-- Row 5 -->
             <StackPanel Grid.Column="1" Grid.Row="5" Orientation="Horizontal" Margin="0,10">
-                <Button x:Name="Drop" Content="Drop" FontSize="20" Width="120" Height="45" MinWidth="65" MinHeight="25" Margin="5"/>
-                <Button x:Name="Reroll" Content="Reroll" FontSize="20" Width="120" Height="45" MinWidth="65" MinHeight="25" Margin="0,5"/>
-                <Button x:Name="Completed" Content="Completed"  FontSize="20" Width="120" Height="45" MinWidth="65" MinHeight="25" Margin="5"/>
+                <Button x:Name="Drop" Content="Дроп" FontSize="20" Width="120" Height="45" MinWidth="65" MinHeight="25" Margin="5"/>
+                <Button x:Name="Reroll" Content="Реролл" FontSize="20" Width="120" Height="45" MinWidth="65" MinHeight="25" Margin="0,5"/>
+                <Button x:Name="Completed" Content="Пройдено"  FontSize="20" Width="120" Height="45" MinWidth="65" MinHeight="25" Margin="5"/>
             </StackPanel>
         </Grid>
         
@@ -117,7 +117,31 @@
 
 
                     <Image Grid.Column="2" Grid.Row="1" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
-                    <Image Grid.Column="2" Grid.Row="1" Source="/Icons/Корона короля Петучей.png" Margin="5" Width="50" Height="50">
+                    <Image Grid.Column="3" Grid.Row="1" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
+                    <Image Grid.Column="4" Grid.Row="1" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
+                    <Image Grid.Column="5" Grid.Row="1" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
+                    <Image Grid.Column="2" Grid.Row="2" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
+                    <Image Grid.Column="3" Grid.Row="2" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
+                    <Image Grid.Column="4" Grid.Row="2" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
+                    <Image Grid.Column="5" Grid.Row="2" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
+                    
+                    
+                    <!-- First row items -->
+                    <Image Grid.Column="2" Grid.Row="1" Source="{Binding ItemPaths[0]}" Margin="5" Width="50" Height="50">
+                        <Image.ToolTip>
+                            <ToolTip>
+                                <TextBlock Text="{Binding ItemDescription}" TextWrapping="Wrap" MaxWidth="200"/>
+                            </ToolTip>
+                        </Image.ToolTip>
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseEnter">
+                                <cal:ActionMessage MethodName="ItemHover">
+                                    <cal:Parameter Value="0" />
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Image>
+                    <Image Grid.Column="3" Grid.Row="1" Source="{Binding ItemPaths[1]}" Margin="5" Width="50" Height="50">
                         <i:Interaction.Triggers>
                             <i:EventTrigger EventName="MouseEnter">
                                 <cal:ActionMessage MethodName="ItemHover">
@@ -126,31 +150,217 @@
                             </i:EventTrigger>
                         </i:Interaction.Triggers>
                     </Image>
-                    <Image Grid.Column="3" Grid.Row="1" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
-                    <Image Grid.Column="3" Grid.Row="1" Source="/Icons/Уголёк.png" Margin="5" Width="50" Height="50"/>
-                    <Image Grid.Column="4" Grid.Row="1" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
-                    <Image Grid.Column="4" Grid.Row="1" Source="/Icons/Рука Мидаса.png" Margin="5" Width="50" Height="50"/>
-                    <Image Grid.Column="5" Grid.Row="1" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
-                    <Image Grid.Column="5" Grid.Row="1" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
-                    <Image Grid.Column="2" Grid.Row="2" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
-                    <Image Grid.Column="2" Grid.Row="2" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
-                    <Image Grid.Column="3" Grid.Row="2" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
-                    <Image Grid.Column="3" Grid.Row="2" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
-                    <Image Grid.Column="4" Grid.Row="2" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
-                    <Image Grid.Column="4" Grid.Row="2" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
-                    <Image Grid.Column="5" Grid.Row="2" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
-                    <Image Grid.Column="5" Grid.Row="2" Source="/Icons/empty.png" Margin="5" Width="50" Height="50"/>
+                    <Image Grid.Column="4" Grid.Row="1" Source="{Binding ItemPaths[2]}" Margin="5" Width="50" Height="50">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseEnter">
+                                <cal:ActionMessage MethodName="ItemHover">
+                                    <cal:Parameter Value="2" />
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Image>
+                    <Image Grid.Column="5" Grid.Row="1" Source="{Binding ItemPaths[3]}" Margin="5" Width="50" Height="50">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseEnter">
+                                <cal:ActionMessage MethodName="ItemHover">
+                                    <cal:Parameter Value="3" />
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Image>
 
+                    <!-- Second row items -->
+                    <Image Grid.Column="2" Grid.Row="2" Source="{Binding ItemPaths[4]}" Margin="5" Width="50" Height="50">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseEnter">
+                                <cal:ActionMessage MethodName="ItemHover">
+                                    <cal:Parameter Value="4" />
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Image>
+                    <Image Grid.Column="3" Grid.Row="2" Source="{Binding ItemPaths[5]}" Width="50" Height="50">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseEnter">
+                                <cal:ActionMessage MethodName="ItemHover">
+                                    <cal:Parameter Value="5" />
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Image>
+                    <Image Grid.Column="4" Grid.Row="2" Source="{Binding ItemPaths[6]}" Margin="5" Width="50" Height="50">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseEnter">
+                                <cal:ActionMessage MethodName="ItemHover">
+                                    <cal:Parameter Value="6" />
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Image>
+                    <Image Grid.Column="5" Grid.Row="2" Source="{Binding ItemPaths[7]}" Margin="5" Width="50" Height="50">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseEnter">
+                                <cal:ActionMessage MethodName="ItemHover">
+                                    <cal:Parameter Value="7" />
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </Image>
 
-                    <Image Grid.Column="2" Grid.Row="4" Source="/Icons/Стримерский ключик.png" Margin="5" Width="50" Height="50"/>
+                    <!-- Third row items -->
+                    <Image Grid.Column="2" Grid.Row="4" Source="{Binding ItemPaths[8]}" Margin="5" Width="50" Height="50">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseEnter">
+                                <cal:ActionMessage MethodName="ItemHover">
+                                    <cal:Parameter Value="8" />
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ItemPaths[8]}" Value="/Icons/null.png">
+                                        <Setter Property="Visibility" Value="Hidden"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                    <Image Grid.Column="3" Grid.Row="4" Source="{Binding ItemPaths[9]}" Margin="5" Width="50" Height="50">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseEnter">
+                                <cal:ActionMessage MethodName="ItemHover">
+                                    <cal:Parameter Value="9" />
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ItemPaths[9]}" Value="/Icons/null.png">
+                                        <Setter Property="Visibility" Value="Hidden"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                    <Image Grid.Column="4" Grid.Row="4" Source="{Binding ItemPaths[10]}" Margin="5" Width="50" Height="50">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseEnter">
+                                <cal:ActionMessage MethodName="ItemHover">
+                                    <cal:Parameter Value="10" />
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ItemPaths[10]}" Value="/Icons/null.png">
+                                        <Setter Property="Visibility" Value="Hidden"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                    <Image Grid.Column="5" Grid.Row="4" Source="{Binding ItemPaths[11]}" Margin="5" Width="50" Height="50">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseEnter">
+                                <cal:ActionMessage MethodName="ItemHover">
+                                    <cal:Parameter Value="11" />
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ItemPaths[11]}" Value="/Icons/null.png">
+                                        <Setter Property="Visibility" Value="Hidden"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
 
+                    <!-- Fourth row items -->
+                    <Image Grid.Column="2" Grid.Row="5" Source="{Binding ItemPaths[12]}" Margin="5" Width="50" Height="50">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseEnter">
+                                <cal:ActionMessage MethodName="ItemHover">
+                                    <cal:Parameter Value="12" />
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ItemPaths[12]}" Value="/Icons/null.png">
+                                        <Setter Property="Visibility" Value="Hidden"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                    <Image Grid.Column="3" Grid.Row="5" Source="{Binding ItemPaths[13]}" Margin="5" Width="50" Height="50">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseEnter">
+                                <cal:ActionMessage MethodName="ItemHover">
+                                    <cal:Parameter Value="13" />
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ItemPaths[13]}" Value="/Icons/null.png">
+                                        <Setter Property="Visibility" Value="Hidden"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                    <Image Grid.Column="4" Grid.Row="5" Source="{Binding ItemPaths[14]}" Margin="5" Width="50" Height="50">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseEnter">
+                                <cal:ActionMessage MethodName="ItemHover">
+                                    <cal:Parameter Value="14" />
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ItemPaths[14]}" Value="/Icons/null.png">
+                                        <Setter Property="Visibility" Value="Hidden"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+                    <Image Grid.Column="5" Grid.Row="5" Source="{Binding ItemPaths[15]}" Margin="5" Width="50" Height="50">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="MouseEnter">
+                                <cal:ActionMessage MethodName="ItemHover">
+                                    <cal:Parameter Value="15" />
+                                </cal:ActionMessage>
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ItemPaths[15]}" Value="/Icons/null.png">
+                                        <Setter Property="Visibility" Value="Hidden"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
 
                 </Grid>
             </Border>
 
             <!-- Row 3-->
             <Label Grid.Column="1" Grid.Row="3" Content="Описание предмета:" FontSize="20" />
-            <TextBlock Grid.Column="1" Grid.Row="4" x:Name="ItemDescription" FontSize="14" />
+            <TextBlock Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="4" x:Name="ItemDescription" FontSize="14" TextWrapping="Wrap" MaxWidth="350" HorizontalAlignment="Left"/>
 
 
         </Grid>
@@ -190,7 +400,7 @@
                             Background="Aqua"
                             BorderThickness="0"
                             Foreground="Azure"
-                            IsIndeterminate="True" />
+                            IsIndeterminate="True"/>
 
 
                     </StackPanel>

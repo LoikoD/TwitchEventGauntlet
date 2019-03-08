@@ -1,9 +1,11 @@
 ﻿using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using TwitchEventGauntlet.Models;
 
 namespace TwitchEventGauntlet.ViewModels
@@ -20,6 +22,7 @@ namespace TwitchEventGauntlet.ViewModels
         private int _subsNeed = 0;
         private bool _isLoading = false;
         private string _itemDescription;
+        private ObservableCollection<string> _itemPaths;
 
         private InfoViewModel infoViewModel;
         private IWindowManager WindowManager;
@@ -159,8 +162,18 @@ namespace TwitchEventGauntlet.ViewModels
                 NotifyOfPropertyChange(() => ItemDescription);
             }
         }
-        public List<Item> items;
+        public ObservableCollection<string> ItemPaths
+        {
+            get { return _itemPaths; }
+            set
+            {
+                _itemPaths = value;
+                NotifyOfPropertyChange(() => ItemPaths);
+            }
+        }
+        
 
+        public List<Item> items;
         public Data data = new Data();
 
 
@@ -168,6 +181,11 @@ namespace TwitchEventGauntlet.ViewModels
         {
             infoViewModel = new InfoViewModel();
             WindowManager = new WindowManager();
+            ItemPaths = new ObservableCollection<string>();
+            while (ItemPaths.Count < 16)
+            {
+                ItemPaths.Add("/Icons/null.png");
+            }
             IsLoading = false;
             OverlayService.GetInstance().Show = (str) =>
             {
@@ -180,9 +198,9 @@ namespace TwitchEventGauntlet.ViewModels
 
         public async void UpdateInfo(string name)
         {
+            IsLoading = true;
             await Task.Factory.StartNew(() =>
             {
-                IsLoading = true;
 
 
                 Name = name;
@@ -191,8 +209,6 @@ namespace TwitchEventGauntlet.ViewModels
                 Section = data.GetCurrentSection();
                 SubGoalStr = data.GetSubGoal();
                 NumGamesStr = data.GetNumGames(Section);
-                items = new List<Item>();
-                //Items = data.GetItemList();
                 switch (Name)
                 {
                     case "Mistafaker":
@@ -217,12 +233,21 @@ namespace TwitchEventGauntlet.ViewModels
                         break;
                 }
 
+                items = new List<Item>();
+                items = data.GetItemList(Id);
+                if (items != null)
+                {
+                    for (int i = 0; i < items.Count; ++i)
+                    {
+                        ItemPaths[i] = ("/Icons/" + items[i].Id + ".png");
+                    }
+                }
 
 
+                IsLoading = false;
             });
 
             //Task.Delay(500).Wait();
-            IsLoading = false;
         }
 
         public void AddSub()
@@ -403,15 +428,11 @@ namespace TwitchEventGauntlet.ViewModels
             WindowManager.ShowWindow(infoViewModel);
         }
 
-        public void ItemHover(int num)
+        public void ItemHover(int index)
         {
-            switch (num)
+            if (items != null && items.Count > index)
             {
-                case 1:
-                {
-                        ItemDescription = "Корона короля Петучей. Шмотка. Бафф.";
-                    break;
-                }
+                ItemDescription = items[index].Description;
             }
         }
     }

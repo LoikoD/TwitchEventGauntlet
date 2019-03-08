@@ -94,6 +94,7 @@
     </Compile>
     <Compile Include="Models\Data.cs" />
     <Compile Include="Models\Item.cs" />
+    <Compile Include="Models\ObservableList.cs" />
     <Compile Include="Models\OverlayService.cs" />
     <Compile Include="Models\WheelObject.cs" />
     <Compile Include="ViewModels\InfoViewModel.cs" />
@@ -166,32 +167,42 @@
     <Resource Include="Icons\empty.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Icons\Венок успеха.png" />
-    <Resource Include="Icons\Взрывчатка.png" />
-    <Resource Include="Icons\Воровской карман.png" />
-    <Resource Include="Icons\Дырявый парашют.png" />
-    <Resource Include="Icons\Жопа Мидаса.png" />
-    <Resource Include="Icons\Замок работяг.png" />
-    <Resource Include="Icons\Корона короля Петучей.png" />
-    <Resource Include="Icons\Косичка Бьерна.png" />
-    <Resource Include="Icons\Кредитка Хакса.png" />
-    <Resource Include="Icons\Монета отстоя.png" />
-    <Resource Include="Icons\Наперсток удачи.png" />
-    <Resource Include="Icons\Очки EZ.png" />
-    <Resource Include="Icons\Парные кольца несчастья.png" />
-    <Resource Include="Icons\Плащ Макса Пейна.png" />
-    <Resource Include="Icons\Плитка шоколада.png" />
-    <Resource Include="Icons\Повязка Рембо.png" />
-    <Resource Include="Icons\Подтянутые штаны.png" />
-    <Resource Include="Icons\Рука Мидаса.png" />
-    <Resource Include="Icons\Свиток реролла.png" />
-    <Resource Include="Icons\Скотч.png" />
-    <Resource Include="Icons\Стримерский ключик.png" />
-    <Resource Include="Icons\Уголёк.png" />
-    <Resource Include="Icons\Четырехлистный клевер.png" />
-    <Resource Include="Icons\Чокер боли.png" />
-    <Resource Include="Icons\Шар всезнания.png" />
-    <Resource Include="Icons\Яблоко раздора.png" />
+    <Resource Include="Icons\33.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Data\items.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\null.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icons\34.png" />
+    <Resource Include="Icons\35.png" />
+    <Resource Include="Icons\36.png" />
+    <Resource Include="Icons\37.png" />
+    <Resource Include="Icons\38.png" />
+    <Resource Include="Icons\39.png" />
+    <Resource Include="Icons\40.png" />
+    <Resource Include="Icons\41.png" />
+    <Resource Include="Icons\42.png" />
+    <Resource Include="Icons\43.png" />
+    <Resource Include="Icons\46.png" />
+    <Resource Include="Icons\47.png" />
+    <Resource Include="Icons\48.png" />
+    <Resource Include="Icons\49.png" />
+    <Resource Include="Icons\50.png" />
+    <Resource Include="Icons\51.png" />
+    <Resource Include="Icons\52.png" />
+    <Resource Include="Icons\53.png" />
+    <Resource Include="Icons\54.png" />
+    <Resource Include="Icons\55.png" />
+    <Resource Include="Icons\56.png" />
+    <Resource Include="Icons\57.png" />
+    <Resource Include="Icons\58.png" />
+    <Resource Include="Icons\59.png" />
+    <Resource Include="Icons\60.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

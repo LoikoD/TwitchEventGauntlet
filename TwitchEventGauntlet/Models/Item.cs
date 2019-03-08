@@ -17,8 +17,9 @@ namespace TwitchEventGauntlet.Models
         public int MaxCharges { get; set; }
         public bool IsGlued { get; set; }
 
-        public Item(string name, string description, bool isBuff, bool isDebuff, bool isLight, int limit, int maxCharges)
+        public Item(int id, string name, string description, bool isBuff, bool isDebuff, bool isLight, int limit, int maxCharges)
         {
+            Id = id;
             Name = name;
             Description = description;
             IsBuff = isBuff;

@@ -94,7 +94,6 @@
     </Compile>
     <Compile Include="Models\Data.cs" />
     <Compile Include="Models\Item.cs" />
-    <Compile Include="Models\ObservableList.cs" />
     <Compile Include="Models\OverlayService.cs" />
     <Compile Include="Models\WheelObject.cs" />
     <Compile Include="ViewModels\InfoViewModel.cs" />
@@ -104,6 +103,7 @@
     <Compile Include="Views\InfoView.xaml.cs">
       <DependentUpon>InfoView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\InventorySizeToVisibilityConverter.cs" />
     <Compile Include="Views\MainView.xaml.cs">
       <DependentUpon>MainView.xaml</DependentUpon>
     </Compile>
@@ -146,6 +146,26 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Styles\Buttons.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Styles\Colors.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Styles\UserControls.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Styles\Fonts.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Styles\Texts.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\InfoView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -203,6 +223,32 @@
     <Resource Include="Icons\58.png" />
     <Resource Include="Icons\59.png" />
     <Resource Include="Icons\60.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\man.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Play_Background.png" />
+    <Resource Include="Images\Play_Foreground.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Play_Game_Empty.png" />
+    <Resource Include="Images\Play_Game_Fill.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Pepega_Foreground.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Pepega_Foreground_Small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Pepega_Background_Small.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Pepega_Fill.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Pepega_Empty.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

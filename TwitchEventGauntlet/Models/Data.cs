@@ -64,11 +64,6 @@ namespace TwitchEventGauntlet.Models
 
             itemList = new List<Item>();
             itemList = GetFullItemList();
-            Console.WriteLine("ITEMS:");
-            foreach (Item item in itemList)
-            {
-                Console.WriteLine(item.Id + ". " + item.Name);
-            }
 
             // Create Google Sheets API service.
             Service = new SheetsService(new BaseClientService.Initializer()
@@ -78,7 +73,7 @@ namespace TwitchEventGauntlet.Models
             });
 
             // Define request parameters.
-            SpreadsheetId = "1-at-FSQXIr9epC5bSd-0zDppJxYokceDhWE4jNTWP20";
+            SpreadsheetId = "1N2HA0RLv6Q_Lxv9y8vBbmlOTv8a2pep_XRp1vicOPx0";
             Range = Name + "!A:S";
             SpreadsheetsResource.ValuesResource.GetRequest request =
                     Service.Spreadsheets.Values.Get(SpreadsheetId, Range);
@@ -808,10 +803,9 @@ namespace TwitchEventGauntlet.Models
         public List<Item> GetItemList(int streamerId)
         {
             List<Item> items = new List<Item>();
-            List<int> idList = new List<int>();
             char letterRange = (char)('K' + streamerId);
 
-            ValueRange itemResponse = Service.Spreadsheets.Values.Get(SpreadsheetId, "Правила!" + letterRange + "18:" + letterRange + "41").Execute();
+            ValueRange itemResponse = Service.Spreadsheets.Values.Get(SpreadsheetId, "Правила!" + letterRange + "20:" + letterRange + "43").Execute();
             IList<IList<object>> values = itemResponse.Values;
             if (values != null && values.Count > 0)
             {
@@ -821,24 +815,54 @@ namespace TwitchEventGauntlet.Models
                     if (row.Count > 0 && row[0] != null && !string.IsNullOrWhiteSpace(row[0].ToString()))
                     {
                         string[] fields = row[0].ToString().Split(',');
+                        bool isGlued = false;
+                        bool isSmall = false;
+                        int charges = 0;
+                        int id = 0;
+                        int cellId = 0;
                         for (int j = 0; j < fields.Count(); ++j)
                         {
-                            try
+                            if (fields[j].First() == '_')
                             {
-                                idList.Add(Convert.ToInt32(fields[j]));
+                                isSmall = true;
+                                fields[j] = fields[j].Substring(1);
                             }
-                            catch (FormatException)
+                            else if (fields[j].First() == '*')
                             {
-                                //Ignore all not int fields
+                                isGlued = true;
+                                fields[j] = fields[j].Except("*").ToString();
+                            }
+                            string[] idAndCell = fields[j].Split(':');
+                            if (idAndCell.Count() > 1)
+                            {
+                                try
+                                {
+                                    id = Convert.ToInt32(idAndCell[0]);
+                                    items.Add(itemList.Where(item => item.Id == id).FirstOrDefault());
+                                    items.Last().IsSmall = isSmall;
+                                    items.Last().IsGlued = isGlued;
+                                    string[] cellAndCharges = idAndCell[1].Split('(', ')');
+                                    cellId = Convert.ToInt32(cellAndCharges[0]);
+                                    items.Last().CellId = cellId;
+                                    if (cellAndCharges.Count() > 1)
+                                    {
+                                        charges = Convert.ToInt32(cellAndCharges[1]);
+                                        items.Last().Charges = charges;
+                                    }
+                                }
+                                catch (FormatException)
+                                {
+                                    Console.WriteLine("Data.GetItemList(): Error! FormatException(\"Not int value where should be int value\")");
+                                }
+                                
+
+                            }
+                            else
+                            {
+                                Console.WriteLine("Data.GetItemList(): Error! Cell(row: " + i + " , field: " + j + ") of inventory has wrong format");
                             }
                         }
                     }
-                }
-                foreach (int id in idList)
-                {
-                    items.Add(itemList.Where(i => i.Id == id).FirstOrDefault());
-
-
                 }
                 return items;
             }
@@ -848,6 +872,39 @@ namespace TwitchEventGauntlet.Models
                 return null;
             }
 
+        }
+
+        public int GetInventorySize(int streamerId)
+        {
+            //get sheet id by sheet name
+            var getRequest = Service.Spreadsheets.Get(SpreadsheetId);
+            getRequest.IncludeGridData = true;
+            char letterRange = (char)('K' + streamerId);
+            getRequest.Ranges = "Правила!" + letterRange + "20:" + letterRange + "43";
+            Spreadsheet spr = getRequest.Execute();
+            
+            Sheet sh = spr.Sheets.Where(s => s.Properties.Title == "Правила").FirstOrDefault();
+            IList<GridData> shData = sh.Data;
+            GridData gridData = shData[0];
+            int i = 0;
+            //Color cellColor = new Color()
+            //{
+
+            //}
+            string background = "{\"alpha\":null,\"blue\":0.8509804,\"green\":0.8509804,\"red\":0.8509804,\"ETag\":null}";
+            Color cellColor;
+            int size = 0;
+            while (i < 24)
+            {
+                cellColor = gridData.RowData[i].Values[0].UserEnteredFormat.BackgroundColor;
+                if (background == JsonConvert.SerializeObject(cellColor))
+                {
+                    return size;
+                }
+                ++size;
+                i += 3;
+            }
+            return size;
         }
     }
 }

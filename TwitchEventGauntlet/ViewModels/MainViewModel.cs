@@ -9,22 +9,51 @@ namespace TwitchEventGauntlet.ViewModels
 {
     class MainViewModel : Conductor<object>
     {
-        
-        public void LoadFakerPage()
+        private Task task;
+
+        public async void LoadFakerPage()
         {
-            ActivateItem(new StreamerViewModel("Mistafaker"));
+            await Task.Factory.StartNew(() =>
+            {
+                if (task != null)
+                {
+                    Task.WaitAny(task);
+                }
+                task = Task.Factory.StartNew(() => { ActivateItem(new StreamerViewModel("Mistafaker")); });
+            });
         }
-        public void LoadMelPage()
+        public async void LoadMelPage()
         {
-            ActivateItem(new StreamerViewModel("Melharucos"));
+            await Task.Factory.StartNew(() =>
+            {
+                if (task != null)
+                {
+                    Task.WaitAny(task);
+                }
+                task = Task.Factory.StartNew(() => { ActivateItem(new StreamerViewModel("Melharucos")); });
+            });
         }
-        public void LoadBjornPage()
+        public async void LoadBjornPage()
         {
-            ActivateItem(new StreamerViewModel("UncleBjorn"));
+            await Task.Factory.StartNew(() =>
+            {
+                if (task != null)
+                {
+                    Task.WaitAny(task);
+                }
+                task = Task.Factory.StartNew(() => { ActivateItem(new StreamerViewModel("UncleBjorn")); });
+            });
         }
-        public void LoadLasqaPage()
+        public async void LoadLasqaPage()
         {
-            ActivateItem(new StreamerViewModel("Lasqa"));
+            await Task.Factory.StartNew(() =>
+            {
+                if (task != null)
+                {
+                    Task.WaitAny(task);
+                }
+                task = Task.Factory.StartNew(() => { ActivateItem(new StreamerViewModel("Lasqa")); });
+            });
         }
     }
 }

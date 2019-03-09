@@ -1,0 +1,27 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:TwitchEventGauntlet.Styles">
+
+    <SolidColorBrush x:Key="DarkBaseBrush" Color="#392e5c" />
+    <Color x:Key="DarkBaseColor">#392e5c</Color>
+
+    <SolidColorBrush x:Key="MediumBaseBrush" Color="#4b367c" />
+    <Color x:Key="MediumBaseColor">#4b367c</Color>
+
+    <SolidColorBrush x:Key="LightBaseBrush" Color="#6441a4" />
+    <Color x:Key="LightBaseColor">#6441a4</Color>
+
+    <SolidColorBrush x:Key="UltraLightBaseBrush" Color="#ac98d1" />
+    <Color x:Key="UltraLightBaseColor">#ac98d1</Color>
+
+
+    <SolidColorBrush x:Key="DarkBrush" Color="#0f0e11" />
+    <Color x:Key="DarkColor">#0f0e11</Color>
+
+    <SolidColorBrush x:Key="MediumBrush" Color="#19171c" />
+    <Color x:Key="MediumColor">#19171c</Color>
+
+    <SolidColorBrush x:Key="LightBrush" Color="#322f37" />
+    <Color x:Key="LightColor">#322f37</Color>
+
+</ResourceDictionary>

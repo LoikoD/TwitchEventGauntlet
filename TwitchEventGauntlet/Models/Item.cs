@@ -16,6 +16,8 @@ namespace TwitchEventGauntlet.Models
         public int Charges { get; set; }
         public int MaxCharges { get; set; }
         public bool IsGlued { get; set; }
+        public bool IsSmall { get; set; }
+        public int CellId { get; set; }
 
         public Item(int id, string name, string description, bool isBuff, bool isDebuff, bool isLight, int limit, int maxCharges)
         {
@@ -27,8 +29,10 @@ namespace TwitchEventGauntlet.Models
             IsLight = isLight;
             Limit = limit;
             MaxCharges = maxCharges;
-            Charges = Charges;
+            Charges = maxCharges;
             IsGlued = false;
+            IsSmall = false;
+            CellId = 0;
         }
     }
 }

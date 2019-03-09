@@ -23,12 +23,19 @@ namespace TwitchEventGauntlet.ViewModels
         private bool _isLoading = false;
         private string _itemDescription;
         private ObservableCollection<string> _itemPaths;
+        private ObservableCollection<string> _smallItemPaths;
+        private int _loadingValue;
+        private int _inventorySize;
 
         private InfoViewModel infoViewModel;
         private IWindowManager WindowManager;
 
         public int Id { get; set; }
         public string Name { get; set; }
+
+
+
+
 
         public string Color
         {
@@ -171,7 +178,45 @@ namespace TwitchEventGauntlet.ViewModels
                 NotifyOfPropertyChange(() => ItemPaths);
             }
         }
-        
+        public ObservableCollection<string> SmallItemPaths
+        {
+            get { return _smallItemPaths; }
+            set
+            {
+                _smallItemPaths = value;
+                NotifyOfPropertyChange(() => SmallItemPaths);
+            }
+        }
+        public int LoadingValue
+        {
+            get { return _loadingValue; }
+            set
+            {
+                if (value > LoadingValue)
+                {
+                    for (int i = LoadingValue; i < value; ++i)
+                    {
+                        _loadingValue = i;
+                        NotifyOfPropertyChange(() => LoadingValue);
+                        Task.Delay(5).Wait();
+                    }
+                }
+                else
+                {
+                    _loadingValue = value;
+                    NotifyOfPropertyChange(() => LoadingValue);
+                }
+            }
+        }
+        public int InventorySize
+        {
+            get { return _inventorySize; }
+            set
+            {
+                _inventorySize = value;
+                NotifyOfPropertyChange(() => InventorySize);
+            }
+        }
 
         public List<Item> items;
         public Data data = new Data();
@@ -179,14 +224,20 @@ namespace TwitchEventGauntlet.ViewModels
 
         public StreamerViewModel(string name)
         {
+            LoadingValue = 0;
+            IsLoading = true;
             infoViewModel = new InfoViewModel();
             WindowManager = new WindowManager();
             ItemPaths = new ObservableCollection<string>();
+            SmallItemPaths = new ObservableCollection<string>();
             while (ItemPaths.Count < 16)
             {
                 ItemPaths.Add("/Icons/null.png");
             }
-            IsLoading = false;
+            while (SmallItemPaths.Count < 16)
+            {
+                SmallItemPaths.Add("/Icons/null.png");
+            }
             OverlayService.GetInstance().Show = (str) =>
             {
                 OverlayService.GetInstance().Text = str;
@@ -198,17 +249,26 @@ namespace TwitchEventGauntlet.ViewModels
 
         public async void UpdateInfo(string name)
         {
-            IsLoading = true;
             await Task.Factory.StartNew(() =>
             {
 
 
                 Name = name;
                 data.Name = Name;
+                Task task = Task.Factory.StartNew(() => { LoadingValue = 25; });
                 GameName = data.GetGames().Last();
+                Task.WaitAny(task);
+                task = Task.Factory.StartNew(() => { LoadingValue = 35; });
+                Task.WaitAny();
                 Section = data.GetCurrentSection();
+                Task.WaitAny(task);
+                task = Task.Factory.StartNew(() => { LoadingValue = 50; });
                 SubGoalStr = data.GetSubGoal();
+                Task.WaitAny(task);
+                task = Task.Factory.StartNew(() => { LoadingValue = 70; });
                 NumGamesStr = data.GetNumGames(Section);
+                Task.WaitAny(task);
+                task = Task.Factory.StartNew(() => { LoadingValue = 90; });
                 switch (Name)
                 {
                     case "Mistafaker":
@@ -234,16 +294,30 @@ namespace TwitchEventGauntlet.ViewModels
                 }
 
                 items = new List<Item>();
+                InventorySize = data.GetInventorySize(Id);
+                Task.WaitAny(task);
+                task = Task.Factory.StartNew(() => { LoadingValue = 100; });
                 items = data.GetItemList(Id);
                 if (items != null)
                 {
-                    for (int i = 0; i < items.Count; ++i)
+                    for (int i = 0; i < 16; ++i)
                     {
-                        ItemPaths[i] = ("/Icons/" + items[i].Id + ".png");
+                        List<Item> itemsI = items.Where(item => item.CellId == i).ToList();
+                        foreach (Item item in itemsI)
+                        {
+                            if (item.IsSmall)
+                            {
+                                SmallItemPaths[i] = ("/Icons/" + item.Id + ".png");
+                            }
+                            else
+                            {
+                                ItemPaths[i] = ("/Icons/" + item.Id + ".png");
+                            }
+                        }
                     }
                 }
 
-
+                Task.WaitAny(task);
                 IsLoading = false;
             });
 
@@ -263,7 +337,7 @@ namespace TwitchEventGauntlet.ViewModels
             data.SetSubsNum(Subs, SubsNeed);
         }
 
-        public void Drop()
+        public void DropGame()
         {
             data.DropCurrent();
             PrevSection();
@@ -430,9 +504,17 @@ namespace TwitchEventGauntlet.ViewModels
 
         public void ItemHover(int index)
         {
-            if (items != null && items.Count > index)
+            if (items != null)
             {
-                ItemDescription = items[index].Description;
+                ItemDescription = items.Where(i => i.CellId == index).FirstOrDefault()?.Description;
+            }
+        }
+
+        public void SmallItemHover(int index)
+        {
+            if (items != null)
+            {
+                ItemDescription = items.Where(i => i.CellId == index && i.IsSmall == true).FirstOrDefault()?.Description;
             }
         }
     }

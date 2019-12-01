@@ -517,6 +517,49 @@ namespace TwitchEventGauntlet.ViewModels
                 ItemDescription = items.Where(i => i.CellId == index && i.IsSmall == true).FirstOrDefault()?.Description;
             }
         }
+
+        public void UseItem(int cellId, bool isSmall)
+        {
+            int itemIndex = items.FindIndex(i => i.CellId == cellId && i.IsSmall == isSmall);
+
+            int itemId = items[itemIndex].Id;
+            switch (itemId)
+            {
+                case 33: // Замок работяг
+                    Random random = new Random();
+                    int cellToBlock = random.Next(0, InventorySize - 1);
+                    bool dropped = DropItem(cellToBlock);
+                    if (dropped)
+                    {
+                        //AssignItemToCell(cellToBlock);
+                    }
+                    break;
+                case 34: // Повязка Рембо
+                    break;
+            }
+
+
+
+
+
+
+            //Reduce charges of item
+            if (items[itemIndex].MaxCharges != 0)
+            {
+                items[itemIndex].Charges--;
+                //NotifyOfPropertyChange(() => items[itemIndex].Charges);
+                if (items[itemIndex].Charges < 1)
+                {
+                    DropItem(cellId, isSmall);
+                }
+            }
+
+        }
+
+        public bool DropItem(int cellId, bool isSmall = false)
+        {
+            throw new NotImplementedException("DropItem has not been implemented yet");
+        }
     }
 
 }
